@@ -37,3 +37,8 @@ dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 dotnet_sort_system_directives_first = true
+
+[*{/Infrastructure/Migrations/*,*/Migrations/*}*]
+generated_code = true
+csharp_style_namespace_declarations = false:none
+dotnet_analyzer_diagnostic.severity = none

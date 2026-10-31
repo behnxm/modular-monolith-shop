@@ -27,3 +27,6 @@ dotnet ef migrations add "$MIGRATION_NAME" \
     --output-dir "$OUTPUT_DIR"
 
 echo "Migration '${MIGRATION_NAME}' added successfully."
+# Ensure migration classes are internal so module encapsulation is preserved (Architecture Test A4)
+MIGRATIONS_PATH="src/Modules/${MODULE}/Shop.Modules.${MODULE}/${OUTPUT_DIR}"
+sed -i 's/public partial class/internal partial class/g' "$MIGRATIONS_PATH"/*_${MIGRATION_NAME}.cs 2>/dev/null || true

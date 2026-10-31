@@ -19,7 +19,7 @@ for MOD in "${MODULES[@]}"; do
         # Only check if migrations directory has migration files
         if [ -d "$MIGRATIONS_DIR" ] && [ "$(find "$MIGRATIONS_DIR" -name "*.cs" | wc -l)" -gt 0 ]; then
             echo "Checking pending model changes for ${MOD}DbContext..."
-            dotnet ef migrations has-pending-model-changes --project "$PROJ" --context "${MOD}DbContext"
+            dotnet ef migrations has-pending-model-changes --project "$PROJ" --startup-project src/Host/Shop.Host/Shop.Host.csproj --context "${MOD}DbContext"
         fi
     fi
 done

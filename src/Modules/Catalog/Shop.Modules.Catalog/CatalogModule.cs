@@ -7,8 +7,15 @@ using Shop.BuildingBlocks.Infrastructure.Data;
 using Shop.BuildingBlocks.Infrastructure.Health;
 using Shop.BuildingBlocks.Infrastructure.Modules;
 using Shop.BuildingBlocks.Infrastructure.Outbox;
+using Shop.Modules.Catalog.Application.CreateProduct;
+using Shop.Modules.Catalog.Application.DeactivateProduct;
+using Shop.Modules.Catalog.Application.GetProduct;
+using Shop.Modules.Catalog.Application.ListProducts;
+using Shop.Modules.Catalog.Application.UpdateProduct;
+using Shop.Modules.Catalog.Contracts;
 using Shop.Modules.Catalog.Endpoints;
 using Shop.Modules.Catalog.Infrastructure;
+using Shop.Modules.Catalog.PublicApi;
 
 namespace Shop.Modules.Catalog;
 
@@ -24,6 +31,16 @@ public sealed class CatalogModule : IModule
         services.AddHostedService<OutboxProcessor<CatalogDbContext>>();
         services.AddHealthChecks()
             .AddCheck<OutboxHealthCheck<CatalogDbContext>>($"outbox_{Name}");
+
+        // Public API
+        services.AddScoped<ICatalogApi, CatalogApi>();
+
+        // Application Use Cases
+        services.AddScoped<CreateProductHandler>();
+        services.AddScoped<UpdateProductHandler>();
+        services.AddScoped<DeactivateProductHandler>();
+        services.AddScoped<GetProductHandler>();
+        services.AddScoped<ListProductsHandler>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

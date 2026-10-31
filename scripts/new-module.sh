@@ -83,6 +83,7 @@ cat <<EOF > "${TESTS_DIR}/Shop.Modules.${NAME}.Tests.csproj"
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
 
   <ItemGroup>

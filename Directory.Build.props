@@ -18,6 +18,7 @@
     <!-- CA1716: Identifiers should not match keywords; 'Error' is the exact domain primitive name -->
     <!-- CA1711: Identifiers should not have incorrect suffix; 'IIntegrationEventHandler' is the exact interface name -->
     <!-- CA1000: Do not declare static members on generic types; standard factory methods on Result<T> -->
-    <NoWarn>$(NoWarn);CA1848;CA1873;CA1707;CA2007;CA1716;CA1711;CA1000</NoWarn>
+    <!-- CA1861: Constant array allocations; standard in generated EF Core migrations -->
+    <NoWarn>$(NoWarn);CA1848;CA1873;CA1707;CA2007;CA1716;CA1711;CA1000;CA1861</NoWarn>
   </PropertyGroup>
 </Project>
