@@ -138,14 +138,18 @@ public sealed class InboxDispatcher(
 
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
 
+            var exceptionToThrow = (ex is System.Reflection.TargetInvocationException tie && tie.InnerException is not null)
+                ? tie.InnerException
+                : ex;
+
             logger.LogError(
-                ex,
+                exceptionToThrow,
                 "Handler {HandlerName} failed processing event {ContractName} (MessageId: {MessageId}). Rolled back.",
                 registration.HandlerName,
                 registration.ContractName,
                 envelope.Id);
 
-            throw;
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(exceptionToThrow).Throw();
         }
     }
 }

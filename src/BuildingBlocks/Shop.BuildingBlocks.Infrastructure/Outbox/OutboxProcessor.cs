@@ -60,6 +60,7 @@ public class OutboxProcessor<TContext>(
             return 0;
         }
 
+        var successCount = 0;
         foreach (var message in messages)
         {
             ActivityContext parentContext = default;
@@ -91,6 +92,7 @@ public class OutboxProcessor<TContext>(
                 await transport.PublishAsync(envelope, cancellationToken);
                 message.ProcessedOn = timeProvider.GetUtcNow();
                 message.LastError = null;
+                successCount++;
 
                 ShopTelemetry.EventsPublishedTotal.Add(
                     1,
@@ -137,7 +139,7 @@ public class OutboxProcessor<TContext>(
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
-        return messages.Count;
+        return successCount;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

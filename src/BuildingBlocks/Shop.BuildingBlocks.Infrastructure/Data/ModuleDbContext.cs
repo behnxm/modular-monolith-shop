@@ -33,16 +33,17 @@ public abstract class ModuleDbContext : DbContext
         {
             builder.ToTable("outbox_messages", _schema);
             builder.HasKey(m => m.Id);
-            builder.Property(m => m.ContractName).IsRequired().HasMaxLength(200);
-            builder.Property(m => m.Payload).IsRequired().HasColumnType("jsonb");
-            builder.Property(m => m.OccurredOn).IsRequired();
-            builder.Property(m => m.TraceParent).HasMaxLength(256);
-            builder.Property(m => m.TraceState).HasMaxLength(512);
-            builder.Property(m => m.Attempts).IsRequired();
-            builder.Property(m => m.NextAttemptOn).IsRequired();
-            builder.Property(m => m.ProcessedOn);
-            builder.Property(m => m.FailedOn);
-            builder.Property(m => m.LastError);
+            builder.Property(m => m.Id).HasColumnName("id");
+            builder.Property(m => m.ContractName).HasColumnName("contract_name").IsRequired().HasMaxLength(200);
+            builder.Property(m => m.Payload).HasColumnName("payload").IsRequired().HasColumnType("jsonb");
+            builder.Property(m => m.OccurredOn).HasColumnName("occurred_on").IsRequired();
+            builder.Property(m => m.TraceParent).HasColumnName("traceparent").HasMaxLength(256);
+            builder.Property(m => m.TraceState).HasColumnName("tracestate").HasMaxLength(512);
+            builder.Property(m => m.Attempts).HasColumnName("attempts").IsRequired();
+            builder.Property(m => m.NextAttemptOn).HasColumnName("next_attempt_on").IsRequired();
+            builder.Property(m => m.ProcessedOn).HasColumnName("processed_on");
+            builder.Property(m => m.FailedOn).HasColumnName("failed_on");
+            builder.Property(m => m.LastError).HasColumnName("last_error");
 
             builder.HasIndex(m => new { m.ProcessedOn, m.FailedOn, m.NextAttemptOn, m.OccurredOn })
                 .HasDatabaseName($"ix_{_schema}_outbox_messages_processing");
@@ -52,8 +53,9 @@ public abstract class ModuleDbContext : DbContext
         {
             builder.ToTable("inbox_messages", _schema);
             builder.HasKey(m => new { m.MessageId, m.HandlerName });
-            builder.Property(m => m.HandlerName).IsRequired().HasMaxLength(200);
-            builder.Property(m => m.ProcessedOn).IsRequired();
+            builder.Property(m => m.MessageId).HasColumnName("message_id");
+            builder.Property(m => m.HandlerName).HasColumnName("handler_name").IsRequired().HasMaxLength(200);
+            builder.Property(m => m.ProcessedOn).HasColumnName("processed_on").IsRequired();
         });
     }
 }

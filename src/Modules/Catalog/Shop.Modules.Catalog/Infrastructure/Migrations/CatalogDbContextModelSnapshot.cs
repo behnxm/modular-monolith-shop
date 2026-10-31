@@ -26,14 +26,17 @@ namespace Shop.Modules.Catalog.Infrastructure.Migrations
             modelBuilder.Entity("Shop.BuildingBlocks.Infrastructure.Inbox.InboxMessage", b =>
                 {
                     b.Property<Guid>("MessageId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
 
                     b.Property<string>("HandlerName")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("handler_name");
 
                     b.Property<DateTimeOffset>("ProcessedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_on");
 
                     b.HasKey("MessageId", "HandlerName");
 
@@ -44,42 +47,53 @@ namespace Shop.Modules.Catalog.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<int>("Attempts")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
 
                     b.Property<string>("ContractName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("contract_name");
 
                     b.Property<DateTimeOffset?>("FailedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("failed_on");
 
                     b.Property<string>("LastError")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("last_error");
 
                     b.Property<DateTimeOffset>("NextAttemptOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_on");
 
                     b.Property<DateTimeOffset>("OccurredOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_on");
 
                     b.Property<string>("Payload")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
 
                     b.Property<DateTimeOffset?>("ProcessedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_on");
 
                     b.Property<string>("TraceParent")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("traceparent");
 
                     b.Property<string>("TraceState")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("tracestate");
 
                     b.HasKey("Id");
 
