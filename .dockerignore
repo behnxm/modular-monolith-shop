@@ -1,0 +1,13 @@
+**/.git
+**/.vs
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/TestResults
+**/*.user
+.work*
+secrets/
+.env
+.env.*
+!.env.example

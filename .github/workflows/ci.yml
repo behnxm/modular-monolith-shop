@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  architecture:
+    name: Architecture Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore Dependencies
+        run: dotnet restore tests/Shop.ArchitectureTests/Shop.ArchitectureTests.csproj
+
+      - name: Run Architecture Tests
+        run: dotnet test tests/Shop.ArchitectureTests/Shop.ArchitectureTests.csproj -c Release --no-restore
+
+  build-test:
+    name: Build & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore Tool Manifest
+        run: dotnet tool restore
+
+      - name: Verify Formatting
+        run: dotnet format --verify-no-changes
+
+      - name: Restore Solution
+        run: dotnet restore ModularMonolithShop.slnx
+
+      - name: Build in Release
+        run: dotnet build ModularMonolithShop.slnx -c Release --no-restore
+
+      - name: Run All Tests
+        run: dotnet test ModularMonolithShop.slnx -c Release --no-build
+
+      - name: Verify No Pending EF Migrations
+        run: |
+          for mod in Catalog Inventory Ordering Payments Notifications; do
+            proj="src/Modules/${mod}/Shop.Modules.${mod}/Shop.Modules.${mod}.csproj"
+            if [ -f "$proj" ]; then
+              mig_dir="src/Modules/${mod}/Shop.Modules.${mod}/Infrastructure/Migrations"
+              if [ -d "$mig_dir" ] && [ "$(find "$mig_dir" -name "*.cs" | wc -l)" -gt 0 ]; then
+                echo "Checking pending model changes for ${mod}DbContext..."
+                dotnet ef migrations has-pending-model-changes --project "$proj" --context "${mod}DbContext"
+              fi
+            fi
+          done
+
+      - name: Check Vulnerable Packages
+        run: dotnet list package --vulnerable --include-transitive
+
+  compose-smoke:
+    name: Compose & Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Initialize Environment
+        run: ./scripts/init.sh
+
+      - name: Start Compose Services
+        run: docker compose up --build --wait
+
+      - name: Run Smoke Test
+        run: ./scripts/smoke-test.sh
+
+      - name: Output Logs on Failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear Down Services
+        if: always()
+        run: docker compose down -v
+
+  codeql:
+    name: CodeQL Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build for Analysis
+        run: dotnet build src/Host/Shop.Host/Shop.Host.csproj -c Release
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

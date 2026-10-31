@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BuildingBlocks\Shop.BuildingBlocks.Testing\Shop.BuildingBlocks.Testing.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Payments\Shop.Modules.Payments\Shop.Modules.Payments.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Payments\Shop.Modules.Payments.Contracts\Shop.Modules.Payments.Contracts.csproj" />
+  </ItemGroup>
+</Project>

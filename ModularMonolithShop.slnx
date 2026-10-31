@@ -1,0 +1,41 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Shop.BuildingBlocks.Abstractions/Shop.BuildingBlocks.Abstractions.csproj" />
+    <Project Path="src/BuildingBlocks/Shop.BuildingBlocks.Infrastructure/Shop.BuildingBlocks.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/Shop.BuildingBlocks.Testing/Shop.BuildingBlocks.Testing.csproj" />
+  </Folder>
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/Shop.Host/Shop.Host.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Catalog/">
+    <Project Path="src/Modules/Catalog/Shop.Modules.Catalog.Contracts/Shop.Modules.Catalog.Contracts.csproj" />
+    <Project Path="src/Modules/Catalog/Shop.Modules.Catalog/Shop.Modules.Catalog.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Inventory/">
+    <Project Path="src/Modules/Inventory/Shop.Modules.Inventory.Contracts/Shop.Modules.Inventory.Contracts.csproj" />
+    <Project Path="src/Modules/Inventory/Shop.Modules.Inventory/Shop.Modules.Inventory.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Shop.Modules.Notifications.Contracts/Shop.Modules.Notifications.Contracts.csproj" />
+    <Project Path="src/Modules/Notifications/Shop.Modules.Notifications/Shop.Modules.Notifications.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Ordering/">
+    <Project Path="src/Modules/Ordering/Shop.Modules.Ordering.Contracts/Shop.Modules.Ordering.Contracts.csproj" />
+    <Project Path="src/Modules/Ordering/Shop.Modules.Ordering/Shop.Modules.Ordering.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Payments/">
+    <Project Path="src/Modules/Payments/Shop.Modules.Payments.Contracts/Shop.Modules.Payments.Contracts.csproj" />
+    <Project Path="src/Modules/Payments/Shop.Modules.Payments/Shop.Modules.Payments.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Shop.ArchitectureTests/Shop.ArchitectureTests.csproj" />
+    <Project Path="tests/Shop.IntegrationTests/Shop.IntegrationTests.csproj" />
+    <Project Path="tests/Shop.Modules.Catalog.Tests/Shop.Modules.Catalog.Tests.csproj" />
+    <Project Path="tests/Shop.Modules.Inventory.Tests/Shop.Modules.Inventory.Tests.csproj" />
+    <Project Path="tests/Shop.Modules.Notifications.Tests/Shop.Modules.Notifications.Tests.csproj" />
+    <Project Path="tests/Shop.Modules.Ordering.Tests/Shop.Modules.Ordering.Tests.csproj" />
+    <Project Path="tests/Shop.Modules.Payments.Tests/Shop.Modules.Payments.Tests.csproj" />
+  </Folder>
+</Solution>
