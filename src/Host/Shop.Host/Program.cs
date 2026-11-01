@@ -221,6 +221,7 @@ foreach (var module in enabledModules)
     module.ConfigureServices(builder.Services, builder.Configuration);
 }
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
@@ -250,7 +251,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // OpenAPI Document & Scalar UI
-app.MapOpenApi("/openapi/{documentName}.json");
+app.MapOpenApi("/openapi/{documentName}.json").AllowAnonymous();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Demonstration"))
 {
@@ -258,7 +259,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Demonstrat
     {
         options.WithTitle("Modular Monolith Shop API");
         options.WithOpenApiRoutePattern("/openapi/v1.json");
-    });
+    }).AllowAnonymous();
 }
 
 // Development Token Issuer

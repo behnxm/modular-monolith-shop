@@ -1,0 +1,134 @@
+### Modular Monolith Shop HTTP Scratchpad
+### Visual Studio / VS Code REST Client Format
+
+@host = http://localhost:8080
+
+### 1. Health Checks
+GET {{host}}/health/live
+
+###
+GET {{host}}/health/ready
+
+###
+GET {{host}}/health/modules
+
+### 2. OpenAPI Specification
+GET {{host}}/openapi/v1.json
+
+### 3. Generate Dev Tokens (Non-Production Only)
+# @name adminTokenRequest
+POST {{host}}/dev/token
+Content-Type: application/json
+
+{
+  "userId": "admin_carol",
+  "displayName": "Carol Administrator",
+  "scopes": ["shop.admin", "shop.customer"]
+}
+
+###
+@adminToken = {{adminTokenRequest.response.body.token}}
+
+# @name customerTokenRequest
+POST {{host}}/dev/token
+Content-Type: application/json
+
+{
+  "userId": "cust_alice",
+  "displayName": "Alice Customer",
+  "scopes": ["shop.customer"]
+}
+
+###
+@customerToken = {{customerTokenRequest.response.body.token}}
+
+### 4. Catalog Management (Admin)
+# @name createProduct
+POST {{host}}/api/v1/catalog/products
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "sku": "PROD-MECHANICAL-KEYBOARD",
+  "name": "Custom Mechanical Keyboard 75%",
+  "description": "Hot-swappable tactile mechanical keyboard with PBT keycaps.",
+  "price": 149.99
+}
+
+###
+@productId = {{createProduct.response.body.id}}
+
+### List Products in Catalog (Customer or Admin)
+GET {{host}}/api/v1/catalog/products?limit=10
+Authorization: Bearer {{customerToken}}
+
+### Get Specific Product by ID
+GET {{host}}/api/v1/catalog/products/{{productId}}
+Authorization: Bearer {{customerToken}}
+
+### 5. Inventory Management (Admin)
+PUT {{host}}/api/v1/inventory/stock/{{productId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "quantity": 100
+}
+
+### Check Stock Level
+GET {{host}}/api/v1/inventory/stock/{{productId}}
+Authorization: Bearer {{customerToken}}
+
+### 6. Order Placement (Customer) - Idempotent Saga Execution
+# @name placeOrder
+POST {{host}}/api/v1/ordering/orders
+Authorization: Bearer {{customerToken}}
+Idempotency-Key: idemp-req-2026-0001
+Content-Type: application/json
+
+{
+  "lines": [
+    {
+      "productId": "{{productId}}",
+      "quantity": 2
+    }
+  ]
+}
+
+###
+@orderId = {{placeOrder.response.body.id}}
+
+### Replay Same Order Request (Demonstrates Idempotent Replay)
+POST {{host}}/api/v1/ordering/orders
+Authorization: Bearer {{customerToken}}
+Idempotency-Key: idemp-req-2026-0001
+Content-Type: application/json
+
+{
+  "lines": [
+    {
+      "productId": "{{productId}}",
+      "quantity": 2
+    }
+  ]
+}
+
+### 7. Order Status & History (Customer)
+GET {{host}}/api/v1/ordering/orders/{{orderId}}
+Authorization: Bearer {{customerToken}}
+
+### List Customer Orders
+GET {{host}}/api/v1/ordering/orders?limit=10
+Authorization: Bearer {{customerToken}}
+
+### 8. Payment Attempt Inspection (Admin)
+GET {{host}}/api/v1/payments/{{orderId}}
+Authorization: Bearer {{adminToken}}
+
+### 9. Customer Notifications
+GET {{host}}/api/v1/notifications
+Authorization: Bearer {{customerToken}}
+
+### 10. Order Cancellation (Customer)
+POST {{host}}/api/v1/ordering/orders/{{orderId}}/cancel
+Authorization: Bearer {{customerToken}}

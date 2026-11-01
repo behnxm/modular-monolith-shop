@@ -17,7 +17,7 @@ internal static class OrderingEndpoints
 {
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("api/v1/orders")
+        var group = endpoints.MapGroup("api/v1/ordering/orders")
             .WithTags("Orders");
 
         // Write: PlaceOrder (Customer)
@@ -48,7 +48,7 @@ internal static class OrderingEndpoints
                 httpContext.Response.Headers.Append("Idempotent-Replayed", "true");
             }
 
-            return Results.Accepted($"/api/v1/orders/{result.Value.Order.Id}", result.Value.Order);
+            return Results.Accepted($"/api/v1/ordering/orders/{result.Value.Order.Id}", result.Value.Order);
         })
         .RequireAuthorization("shop.customer")
         .RequireRateLimiting("write")

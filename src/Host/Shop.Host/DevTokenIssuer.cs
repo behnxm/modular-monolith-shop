@@ -90,7 +90,41 @@ public static class DevTokenIssuer
 
         var signingKey = GetOrLoadSigningKey(configuration, environment);
 
-        endpoints.MapPost("/dev/token", (DevTokenRequest request) =>
+        endpoints.MapPost("/dev/token", HandleDevToken)
+        .AllowAnonymous()
+        .RequireRateLimiting("dev-token")
+        .WithTags("Development")
+        .WithSummary("Issue a short-lived development bearer token (NON-PRODUCTION ONLY)");
+
+        endpoints.MapPost("/dev-token", HandleDevToken)
+        .AllowAnonymous()
+        .RequireRateLimiting("dev-token")
+        .WithTags("Development")
+        .WithSummary("Issue a short-lived development bearer token (NON-PRODUCTION ONLY)");
+
+        endpoints.MapGet("/.well-known/jwks.json", () =>
+        {
+            var parameters = _devKey!.ExportParameters(false);
+            var jwk = new JsonWebKey
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                Crv = JsonWebKeyECTypes.P256,
+                Kid = DevKeyId,
+                Use = "sig",
+                Alg = SecurityAlgorithms.EcdsaSha256,
+                X = Base64UrlEncoder.Encode(parameters.Q.X!),
+                Y = Base64UrlEncoder.Encode(parameters.Q.Y!)
+            };
+
+            var jwks = new JsonWebKeySet();
+            jwks.Keys.Add(jwk);
+
+            return Results.Ok(jwks);
+        })
+        .AllowAnonymous()
+        .WithTags("Development");
+
+        IResult HandleDevToken(DevTokenRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.UserId))
             {
@@ -133,32 +167,6 @@ public static class DevTokenIssuer
                 tokenType = "Bearer",
                 expiresIn = 7200
             });
-        })
-        .AllowAnonymous()
-        .RequireRateLimiting("dev-token")
-        .WithTags("Development")
-        .WithSummary("Issue a short-lived development bearer token (NON-PRODUCTION ONLY)");
-
-        endpoints.MapGet("/.well-known/jwks.json", () =>
-        {
-            var parameters = _devKey!.ExportParameters(false);
-            var jwk = new JsonWebKey
-            {
-                Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
-                Crv = JsonWebKeyECTypes.P256,
-                Kid = DevKeyId,
-                Use = "sig",
-                Alg = SecurityAlgorithms.EcdsaSha256,
-                X = Base64UrlEncoder.Encode(parameters.Q.X!),
-                Y = Base64UrlEncoder.Encode(parameters.Q.Y!)
-            };
-
-            var jwks = new JsonWebKeySet();
-            jwks.Keys.Add(jwk);
-
-            return Results.Ok(jwks);
-        })
-        .AllowAnonymous()
-        .WithTags("Development");
+        }
     }
 }
