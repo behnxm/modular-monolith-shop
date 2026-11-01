@@ -28,7 +28,7 @@ public sealed class InventoryModule : IModule
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<InventoryDbContext>(configuration, Name);
-        services.AddHostedService<OutboxProcessor<InventoryDbContext>>();
+        services.AddOutboxProcessor<InventoryDbContext>();
         services.AddHealthChecks()
             .AddCheck<OutboxHealthCheck<InventoryDbContext>>($"outbox_{Name}");
 

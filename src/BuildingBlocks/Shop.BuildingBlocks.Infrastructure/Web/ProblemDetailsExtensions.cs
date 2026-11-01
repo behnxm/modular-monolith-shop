@@ -18,6 +18,7 @@ public static class ProblemDetailsExtensions
             ErrorType.Conflict => StatusCodes.Status409Conflict,
             ErrorType.Forbidden => StatusCodes.Status403Forbidden,
             ErrorType.PreconditionFailed => StatusCodes.Status412PreconditionFailed,
+            ErrorType.UnprocessableEntity => StatusCodes.Status422UnprocessableEntity,
             ErrorType.Failure => StatusCodes.Status500InternalServerError,
             _ => StatusCodes.Status500InternalServerError
         };

@@ -28,7 +28,7 @@ public sealed class CatalogModule : IModule
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<CatalogDbContext>(configuration, Name);
-        services.AddHostedService<OutboxProcessor<CatalogDbContext>>();
+        services.AddOutboxProcessor<CatalogDbContext>();
         services.AddHealthChecks()
             .AddCheck<OutboxHealthCheck<CatalogDbContext>>($"outbox_{Name}");
 

@@ -21,7 +21,7 @@ public sealed class NotificationsModule : IModule
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<NotificationsDbContext>(configuration, Name);
-        services.AddHostedService<OutboxProcessor<NotificationsDbContext>>();
+        services.AddOutboxProcessor<NotificationsDbContext>();
         services.AddHealthChecks()
             .AddCheck<OutboxHealthCheck<NotificationsDbContext>>($"outbox_{Name}");
     }

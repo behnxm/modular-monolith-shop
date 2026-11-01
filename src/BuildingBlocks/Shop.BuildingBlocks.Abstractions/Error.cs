@@ -19,6 +19,9 @@ public sealed record Error(string Code, string Description, ErrorType Type)
     public static Error PreconditionFailed(string code, string description) =>
         new(code, description, ErrorType.PreconditionFailed);
 
+    public static Error UnprocessableEntity(string code, string description) =>
+        new(code, description, ErrorType.UnprocessableEntity);
+
     public static Error Failure(string code, string description) =>
         new(code, description, ErrorType.Failure);
 }

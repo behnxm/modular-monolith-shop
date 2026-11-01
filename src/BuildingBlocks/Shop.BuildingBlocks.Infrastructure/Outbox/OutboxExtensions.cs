@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Shop.BuildingBlocks.Abstractions;
 using Shop.BuildingBlocks.Infrastructure.Data;
 
@@ -9,6 +11,14 @@ namespace Shop.BuildingBlocks.Infrastructure.Outbox;
 public static class OutboxExtensions
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    public static IServiceCollection AddOutboxProcessor<TContext>(this IServiceCollection services)
+        where TContext : ModuleDbContext
+    {
+        services.AddSingleton<OutboxProcessor<TContext>>();
+        services.AddHostedService(sp => sp.GetRequiredService<OutboxProcessor<TContext>>());
+        return services;
+    }
 
     public static OutboxMessage Enqueue(
         this ModuleDbContext db,

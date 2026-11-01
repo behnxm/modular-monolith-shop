@@ -7,5 +7,6 @@ public enum ErrorType
     Conflict,
     Forbidden,
     PreconditionFailed,
+    UnprocessableEntity,
     Failure
 }
