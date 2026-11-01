@@ -57,12 +57,12 @@ internal static class OrderingEndpoints
         // Read: ListMyOrders (Customer)
         group.MapGet("/", async (
             [FromQuery] string? cursor,
-            [FromQuery] int limit,
+            [FromQuery] int? limit,
             ListMyOrdersHandler handler,
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
-            var query = new ListOrdersQuery(limit == 0 ? 25 : limit, cursor);
+            var query = new ListOrdersQuery(limit ?? 25, cursor);
             var result = await handler.HandleAsync(query, cancellationToken);
             if (result.IsFailure)
             {
@@ -78,12 +78,12 @@ internal static class OrderingEndpoints
         // Read: Admin ListAllOrders
         group.MapGet("/admin", async (
             [FromQuery] string? cursor,
-            [FromQuery] int limit,
+            [FromQuery] int? limit,
             ListAllOrdersHandler handler,
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
-            var query = new ListOrdersQuery(limit == 0 ? 25 : limit, cursor);
+            var query = new ListOrdersQuery(limit ?? 25, cursor);
             var result = await handler.HandleAsync(query, cancellationToken);
             if (result.IsFailure)
             {

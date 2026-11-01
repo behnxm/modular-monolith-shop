@@ -7,11 +7,13 @@
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BuildingBlocks\Shop.BuildingBlocks.Testing\Shop.BuildingBlocks.Testing.csproj" />
     <ProjectReference Include="..\..\src\Modules\Notifications\Shop.Modules.Notifications\Shop.Modules.Notifications.csproj" />
     <ProjectReference Include="..\..\src\Modules\Notifications\Shop.Modules.Notifications.Contracts\Shop.Modules.Notifications.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Ordering\Shop.Modules.Ordering.Contracts\Shop.Modules.Ordering.Contracts.csproj" />
   </ItemGroup>
 </Project>

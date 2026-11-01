@@ -98,13 +98,13 @@ internal static class CatalogEndpoints
         // Read: ListProducts (Customer or Admin)
         group.MapGet("/", async (
             [FromQuery] string? cursor,
-            [FromQuery] int limit,
+            [FromQuery] int? limit,
             [FromQuery] string? search,
             ListProductsHandler handler,
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
-            var query = new ListProductsQuery(cursor, limit == 0 ? 25 : limit, search);
+            var query = new ListProductsQuery(cursor, limit ?? 25, search);
             var result = await handler.HandleAsync(query, cancellationToken);
             if (result.IsFailure)
             {

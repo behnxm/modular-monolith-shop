@@ -16,6 +16,9 @@ using Shop.Modules.Catalog.PublicApi;
 using Shop.Modules.Inventory;
 using Shop.Modules.Inventory.Domain;
 using Shop.Modules.Inventory.Infrastructure;
+using Shop.Modules.Notifications;
+using Shop.Modules.Notifications.Domain;
+using Shop.Modules.Notifications.Infrastructure;
 using Shop.Modules.Ordering;
 using Shop.Modules.Ordering.Application.CancelOrder;
 using Shop.Modules.Ordering.Application.GetOrder;
@@ -48,6 +51,7 @@ public sealed class OrderSagaIntegrationTests : IClassFixture<PostgreSqlFixture>
         await MigrateAsync<InventoryDbContext>("inventory");
         await MigrateAsync<OrderingDbContext>("ordering");
         await MigrateAsync<PaymentsDbContext>("payments");
+        await MigrateAsync<NotificationsDbContext>("notifications");
 
         // 2. Setup DI with all modules, handlers, and eventing
         var services = new ServiceCollection();
@@ -63,6 +67,7 @@ public sealed class OrderSagaIntegrationTests : IClassFixture<PostgreSqlFixture>
                 ["ConnectionStrings:inventory"] = _fixture.GetAppConnectionString("inventory"),
                 ["ConnectionStrings:ordering"] = _fixture.GetAppConnectionString("ordering"),
                 ["ConnectionStrings:payments"] = _fixture.GetAppConnectionString("payments"),
+                ["ConnectionStrings:notifications"] = _fixture.GetAppConnectionString("notifications"),
                 ["Modules:payments:ApprovalLimit"] = "10000.00"
             })
             .Build();
@@ -75,6 +80,7 @@ public sealed class OrderSagaIntegrationTests : IClassFixture<PostgreSqlFixture>
         registry.RegisterModuleContracts(typeof(Shop.Modules.Inventory.Contracts.IntegrationEvents.V1.StockReservedIntegrationEvent).Assembly);
         registry.RegisterModuleContracts(typeof(Shop.Modules.Ordering.Contracts.IntegrationEvents.V1.OrderPlacedIntegrationEvent).Assembly);
         registry.RegisterModuleContracts(typeof(Shop.Modules.Payments.Contracts.IntegrationEvents.V1.PaymentSucceededIntegrationEvent).Assembly);
+        registry.RegisterModuleContracts(typeof(Shop.Modules.Notifications.Contracts.IntegrationEvents.V1.NotificationRecordedIntegrationEvent).Assembly);
 
         services.AddSingleton(registry);
         services.AddSingleton<IInboxDispatcher, InboxDispatcher>();
@@ -85,11 +91,12 @@ public sealed class OrderSagaIntegrationTests : IClassFixture<PostgreSqlFixture>
         new InventoryModule().ConfigureServices(services, configuration);
         new OrderingModule().ConfigureServices(services, configuration);
         new PaymentsModule().ConfigureServices(services, configuration);
+        new NotificationsModule().ConfigureServices(services, configuration);
 
         _serviceProvider = services.BuildServiceProvider();
 
         // 3. Reset schemas
-        await _fixture.ResetSchemasAsync("catalog", "inventory", "ordering", "payments");
+        await _fixture.ResetSchemasAsync("catalog", "inventory", "ordering", "payments", "notifications");
     }
 
     private async Task MigrateAsync<TContext>(string schema) where TContext : DbContext
@@ -115,7 +122,8 @@ public sealed class OrderSagaIntegrationTests : IClassFixture<PostgreSqlFixture>
             ct => _serviceProvider.GetRequiredService<OutboxProcessor<CatalogDbContext>>().ProcessBatchAsync(ct),
             ct => _serviceProvider.GetRequiredService<OutboxProcessor<InventoryDbContext>>().ProcessBatchAsync(ct),
             ct => _serviceProvider.GetRequiredService<OutboxProcessor<OrderingDbContext>>().ProcessBatchAsync(ct),
-            ct => _serviceProvider.GetRequiredService<OutboxProcessor<PaymentsDbContext>>().ProcessBatchAsync(ct)
+            ct => _serviceProvider.GetRequiredService<OutboxProcessor<PaymentsDbContext>>().ProcessBatchAsync(ct),
+            ct => _serviceProvider.GetRequiredService<OutboxProcessor<NotificationsDbContext>>().ProcessBatchAsync(ct)
         ];
 
         var iterations = 0;
@@ -187,6 +195,12 @@ public sealed class OrderSagaIntegrationTests : IClassFixture<PostgreSqlFixture>
         var finalPayment = await paymentsDb.PaymentAttempts.AsNoTracking().FirstAsync(p => p.OrderId == orderId, ct);
         finalPayment.Status.ShouldBe(PaymentStatus.Succeeded);
         finalPayment.Amount.ShouldBe(100.00m);
+
+        // Notifications: Order confirmed notification recorded
+        var notificationsDb = sp.GetRequiredService<NotificationsDbContext>();
+        var finalNotification = await notificationsDb.Notifications.AsNoTracking().FirstAsync(n => n.CustomerId == "cust_01", ct);
+        finalNotification.Kind.ShouldBe(NotificationKind.OrderConfirmed);
+        finalNotification.Subject.ShouldBe("Order Confirmed");
     }
 
     [Fact]
@@ -240,6 +254,12 @@ public sealed class OrderSagaIntegrationTests : IClassFixture<PostgreSqlFixture>
         {
             payment.Status.ShouldNotBe(PaymentStatus.Succeeded);
         }
+
+        // Notifications: Order cancelled notification recorded
+        var notificationsDb = sp.GetRequiredService<NotificationsDbContext>();
+        var finalNotification = await notificationsDb.Notifications.AsNoTracking().FirstAsync(n => n.CustomerId == "cust_01", ct);
+        finalNotification.Kind.ShouldBe(NotificationKind.OrderCancelled);
+        finalNotification.Subject.ShouldBe("Order Cancelled");
     }
 
     [Fact]

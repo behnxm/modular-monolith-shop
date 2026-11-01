@@ -69,17 +69,7 @@ var enabledModules = allModules
     .ToList();
 
 // Validate required dependencies between enabled modules
-foreach (var module in enabledModules)
-{
-    foreach (var required in module.RequiredModules)
-    {
-        if (!enabledNamesSet.Contains(required.ToLowerInvariant()))
-        {
-            throw new InvalidOperationException(
-                $"Module '{module.Name}' requires module '{required}', but '{required}' is not enabled in configuration 'Modules:Enabled'.");
-        }
-    }
-}
+ModuleValidator.ValidateDependencies(enabledModules);
 
 // 4. Infrastructure & Eventing setup
 var eventRegistry = new IntegrationEventRegistry();
@@ -118,7 +108,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAlgorithms = [SecurityAlgorithms.EcdsaSha256, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.RsaSsaPssSha256]
         };
 
-        if (devIssuerEnabled)
+        if (builder.Configuration.GetValue<bool>("DevIssuer:Enabled"))
         {
             var signingKey = DevTokenIssuer.GetOrLoadSigningKey(builder.Configuration, builder.Environment);
             tokenValidationParams.ValidIssuer = DevTokenIssuer.DevIssuerAuthority;

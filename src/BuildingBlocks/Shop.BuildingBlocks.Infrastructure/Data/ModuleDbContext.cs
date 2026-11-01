@@ -96,6 +96,9 @@ public static class ModuleDbContextRegistrationExtensions
             });
         });
 
+        services.AddHealthChecks()
+            .AddDbContextCheck<TContext>($"db_{normalizedModuleName}", tags: ["ready", "db"]);
+
         return services;
     }
 }
