@@ -26,6 +26,18 @@ using Shop.Modules.Notifications;
 using Shop.Modules.Ordering;
 using Shop.Modules.Payments;
 
+// Fast-path standalone CLI commands that do not need DI or WebHost initialization
+if (args.Contains("--healthcheck"))
+{
+    return await CliRunner.ExecuteHealthCheckAsync();
+}
+
+var keyGenIndex = Array.IndexOf(args, "--generate-dev-key");
+if (keyGenIndex >= 0 && keyGenIndex + 1 < args.Length)
+{
+    return CliRunner.ExecuteGenerateDevKey(args[keyGenIndex + 1]);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Strict Request Size Limits (64 KB)

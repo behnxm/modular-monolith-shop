@@ -58,6 +58,7 @@ curl -s -f -X PUT "$BASE_URL/api/v1/inventory/stock/$PRODUCT_ID" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
     -d '{ "onHand": 50 }'
+echo ""
 
 # 5. Place order with Idempotency-Key
 IDEMPOTENCY_KEY="smoke-key-$(date +%s)"
@@ -112,15 +113,28 @@ if [ $CONFIRMED -ne 1 ]; then
     exit 1
 fi
 
-# 7. Check customer notification
+# 7. Check customer notification (polling for asynchronous outbox delivery)
 echo "Checking customer notifications..."
-NOTIF_RESP=$(curl -s -f -X GET "$BASE_URL/api/v1/notifications" \
-    -H "Authorization: Bearer $CUSTOMER_TOKEN")
+NOTIF_ATTEMPTS=15
+NOTIF_CONFIRMED=0
 
-if echo "$NOTIF_RESP" | grep -q "OrderConfirmed"; then
+while [ $NOTIF_ATTEMPTS -gt 0 ]; do
+    NOTIF_RESP=$(curl -s -f -X GET "$BASE_URL/api/v1/notifications" \
+        -H "Authorization: Bearer $CUSTOMER_TOKEN" || echo "")
+
+    if echo "$NOTIF_RESP" | grep -q "OrderConfirmed"; then
+        NOTIF_CONFIRMED=1
+        break
+    fi
+
+    sleep 1
+    NOTIF_ATTEMPTS=$((NOTIF_ATTEMPTS - 1))
+done
+
+if [ $NOTIF_CONFIRMED -eq 1 ]; then
     echo "PASS: Order confirmed and notification recorded successfully."
     exit 0
 else
-    echo "FAIL: Notification for OrderConfirmed not found in response."
+    echo "FAIL: Notification for OrderConfirmed not found in response: $NOTIF_RESP"
     exit 1
 fi

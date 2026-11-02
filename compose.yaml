@@ -76,7 +76,7 @@ services:
       ConnectionStrings__ordering: Host=postgres;Port=5432;Database=${POSTGRES_DB:-shop};Username=ordering_app;Password=${ORDERING_APP_PASSWORD:-ordering_secure_password_2026}
       ConnectionStrings__payments: Host=postgres;Port=5432;Database=${POSTGRES_DB:-shop};Username=payments_app;Password=${PAYMENTS_APP_PASSWORD:-payments_secure_password_2026}
       ConnectionStrings__notifications: Host=postgres;Port=5432;Database=${POSTGRES_DB:-shop};Username=notifications_app;Password=${NOTIFICATIONS_APP_PASSWORD:-notifications_secure_password_2026}
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     depends_on:
       postgres:
         condition: service_healthy

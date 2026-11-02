@@ -58,23 +58,23 @@ internal sealed class PlaceOrderHandler(
             }
         }
 
-        if (request.Items is null || request.Items.Count == 0)
+        if (request.Lines is null || request.Lines.Count == 0)
         {
             return Result<OrderPlacementResult>.Failure(OrderingErrors.EmptyOrderLines);
         }
 
-        if (request.Items.Count > 50)
+        if (request.Lines.Count > 50)
         {
             return Result<OrderPlacementResult>.Failure(OrderingErrors.TooManyOrderLines);
         }
 
         // 2. Fetch product snapshots synchronously through ICatalogApi
-        var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();
+        var productIds = request.Lines.Select(i => i.ProductId).Distinct().ToList();
         var catalogProducts = await catalogApi.GetProductsAsync(productIds, cancellationToken);
         var productDict = catalogProducts.ToDictionary(p => p.Id);
 
         var orderItems = new List<(Guid ProductId, string ProductName, decimal UnitPrice, int Quantity)>();
-        foreach (var item in request.Items)
+        foreach (var item in request.Lines)
         {
             if (!productDict.TryGetValue(item.ProductId, out var catalogProduct))
             {
@@ -151,7 +151,7 @@ internal sealed class PlaceOrderHandler(
 
     private static string ComputeRequestHash(PlaceOrderRequest request)
     {
-        var items = request.Items?
+        var items = request.Lines?
             .OrderBy(i => i.ProductId)
             .Select(i => $"{i.ProductId}:{i.Quantity}")
             ?? [];

@@ -569,11 +569,11 @@
       },
       "PlaceOrderRequest": {
         "required": [
-          "items"
+          "lines"
         ],
         "type": "object",
         "properties": {
-          "items": {
+          "lines": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PlaceOrderItemRequest"

@@ -20,7 +20,7 @@ public sealed record DevTokenRequest(
 
 public static class DevTokenIssuer
 {
-    public const string DevIssuerAuthority = "https://dev-issuer.shop.local";
+    public const string DevIssuerAuthority = "https://auth.shop.local";
     public const string DevKeyId = "dev-issuer-key-2026";
 
     private static ECDsa? _devKey;

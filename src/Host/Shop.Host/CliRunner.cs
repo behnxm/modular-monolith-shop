@@ -33,41 +33,75 @@ public static class CliRunner
         var devKeyIndex = Array.IndexOf(args, "--generate-dev-key");
         if (devKeyIndex >= 0 && devKeyIndex + 1 < args.Length)
         {
-            var targetPath = args[devKeyIndex + 1];
-            using var ecdsa = System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve.NamedCurves.nistP256);
-            var dir = Path.GetDirectoryName(targetPath);
-            if (!string.IsNullOrEmpty(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            File.WriteAllText(targetPath, ecdsa.ExportECPrivateKeyPem());
-            logger.LogInformation("Generated development ECDSA signing key at {Path}", targetPath);
-            return 0;
+            return ExecuteGenerateDevKey(args[devKeyIndex + 1], logger);
         }
 
         return null;
     }
 
-    private static async Task<int> ExecuteHealthCheckAsync(ILogger logger)
+    public static async Task<int> ExecuteHealthCheckAsync(ILogger? logger = null)
     {
         try
         {
+            var port = Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS") ?? "8080";
+            var url = $"http://127.0.0.1:{port}/health/live";
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
-            var response = await client.GetAsync("http://localhost:8080/health/live");
+            var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
-                logger.LogInformation("Liveness healthcheck passed (HTTP {StatusCode}).", (int)response.StatusCode);
+                if (logger is not null)
+                {
+                    logger.LogInformation("Liveness healthcheck passed (HTTP {StatusCode}).", (int)response.StatusCode);
+                }
+                else
+                {
+                    Console.WriteLine($"Liveness healthcheck passed (HTTP {(int)response.StatusCode}).");
+                }
                 return 0;
             }
 
-            logger.LogError("Liveness healthcheck failed with HTTP {StatusCode}.", (int)response.StatusCode);
+            if (logger is not null)
+            {
+                logger.LogError("Liveness healthcheck failed with HTTP {StatusCode}.", (int)response.StatusCode);
+            }
+            else
+            {
+                Console.Error.WriteLine($"Liveness healthcheck failed with HTTP {(int)response.StatusCode}.");
+            }
             return 1;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Liveness healthcheck probe failed to connect.");
+            if (logger is not null)
+            {
+                logger.LogError(ex, "Liveness healthcheck probe failed to connect.");
+            }
+            else
+            {
+                Console.Error.WriteLine($"Liveness healthcheck probe failed to connect: {ex.Message}");
+            }
             return 1;
         }
+    }
+
+    public static int ExecuteGenerateDevKey(string targetPath, ILogger? logger = null)
+    {
+        using var ecdsa = System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve.NamedCurves.nistP256);
+        var dir = Path.GetDirectoryName(targetPath);
+        if (!string.IsNullOrEmpty(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+        File.WriteAllText(targetPath, ecdsa.ExportECPrivateKeyPem());
+        if (logger is not null)
+        {
+            logger.LogInformation("Generated development ECDSA signing key at {Path}", targetPath);
+        }
+        else
+        {
+            Console.WriteLine($"Generated development ECDSA signing key at {targetPath}");
+        }
+        return 0;
     }
 
     private static async Task<int> ExecuteMigrationsAsync(
