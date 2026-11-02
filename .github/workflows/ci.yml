@@ -79,14 +79,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Make Scripts Executable
+        run: chmod +x scripts/*.sh deploy/postgres/*.sh
+
       - name: Initialize Environment
-        run: ./scripts/init.sh
+        run: bash ./scripts/init.sh
 
       - name: Start Compose Services
         run: docker compose up --build --wait
 
       - name: Run Smoke Test
-        run: ./scripts/smoke-test.sh
+        run: bash ./scripts/smoke-test.sh
 
       - name: Output Logs on Failure
         if: failure()

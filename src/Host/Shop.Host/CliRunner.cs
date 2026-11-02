@@ -30,6 +30,21 @@ public static class CliRunner
             return await ExecuteSeedDemoAsync(app.Services, enabledModules, logger);
         }
 
+        var devKeyIndex = Array.IndexOf(args, "--generate-dev-key");
+        if (devKeyIndex >= 0 && devKeyIndex + 1 < args.Length)
+        {
+            var targetPath = args[devKeyIndex + 1];
+            using var ecdsa = System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve.NamedCurves.nistP256);
+            var dir = Path.GetDirectoryName(targetPath);
+            if (!string.IsNullOrEmpty(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            File.WriteAllText(targetPath, ecdsa.ExportECPrivateKeyPem());
+            logger.LogInformation("Generated development ECDSA signing key at {Path}", targetPath);
+            return 0;
+        }
+
         return null;
     }
 

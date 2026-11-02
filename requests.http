@@ -72,7 +72,7 @@ Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "quantity": 100
+  "onHand": 100
 }
 
 ### Check Stock Level

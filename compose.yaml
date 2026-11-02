@@ -83,7 +83,7 @@ services:
       migrate:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "/app/Shop.Host", "--healthcheck"]
+      test: ["CMD", "dotnet", "/app/Shop.Host.dll", "--healthcheck"]
       interval: 5s
       timeout: 3s
       retries: 5

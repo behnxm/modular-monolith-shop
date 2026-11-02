@@ -48,6 +48,6 @@ USER $APP_UID
 COPY --from=build --chown=$APP_UID:$APP_UID /app/publish .
 
 HEALTHCHECK --interval=5s --timeout=3s --retries=5 --start-period=10s \
-  CMD ["/app/Shop.Host", "--healthcheck"]
+  CMD ["dotnet", "/app/Shop.Host.dll", "--healthcheck"]
 
-ENTRYPOINT ["./Shop.Host"]
+ENTRYPOINT ["dotnet", "Shop.Host.dll"]
